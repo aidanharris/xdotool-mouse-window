@@ -1,0 +1,84 @@
+#!/usr/bin/env ruby
+
+require 'thor'
+
+# Main ├────────────────────────────────────────────────────────────────────────
+
+class Sync < Thor
+
+  desc 'move', 'move mouse'
+
+  option :window
+
+  def move x, y
+
+    x, y = x.to_f, y.to_f
+
+    window_id = (options[:window] || `xdotool getactivewindow`).to_i
+
+    window_geometry = (`xdotool getwindowgeometry #{window_id}`.scan /Position: (?<x>\d+),(?<y>\d+)(.*)Geometry: (?<width>\d+)x(?<height>\d+)/m).first.map { |key, value| [ key.to_sym, value.to_i ] }.to_h
+
+    x = window_geometry[:width]  * x
+    y = window_geometry[:height] * y
+
+    `xdotool mousemove --window #{window_id} #{x} #{y}`
+
+  end
+
+  desc 'get', 'get mouse location'
+
+  option :shell
+
+  def get
+
+    window_geometry = (`xdotool getactivewindow getwindowgeometry`.scan /Position: (?<x>\d+),(?<y>\d+)(.*)Geometry: (?<width>\d+)x(?<height>\d+)/m).first.map { |key, value| [ key.to_sym, value.to_i ] }.to_h
+
+    mouse_location = (`xdotool getmouselocation`.scan /x:(?<x>\d+) y:(?<y>\d+) screen:(?<screen>\d+) window:(?<window>\d+)/).first.map { |key, value| [ key.to_sym, value.to_i ] }.to_h
+
+    window_mouse_location = {
+      x: mouse_location[:x] - window_geometry[:x],
+      y: mouse_location[:y] - window_geometry[:y],
+    }
+
+    coefficient = {
+      x: window_mouse_location[:x].to_f / window_geometry[:width].to_f,
+      y: window_mouse_location[:y].to_f / window_geometry[:height].to_f,
+    }
+
+    data = {
+      x: window_mouse_location[:x],
+      y: window_mouse_location[:y],
+      cx: coefficient[:x],
+      cy: coefficient[:y],
+      screen: mouse_location[:screen],
+      window: mouse_location[:window],
+    }
+
+    output =
+    if options[:shell]
+      data.collect { |key, value| "#{key.upcase}=#{value}" }.join "\n"
+    else
+      data.collect { |key, value| "#{key}:#{value}" }.join ' '
+    end
+
+    print output
+
+  end
+
+end
+
+# Utility ├─────────────────────────────────────────────────────────────────────
+
+class String
+  alias :old_scan :scan
+  def scan regexp
+    if regexp.names.empty?
+      old_scan(regexp)
+    else
+      old_scan(regexp).collect { |match| Hash[regexp.names.zip match] }
+    end
+  end
+end
+
+
+Sync.start ARGV
