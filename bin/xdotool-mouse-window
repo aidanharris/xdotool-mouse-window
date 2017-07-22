@@ -14,14 +14,14 @@ class Sync < Thor
 
     x, y = x.to_f, y.to_f
 
-    window_id = (options[:window] || `xdotool getactivewindow`).to_i
+    window_id = (options[:window] || %x(xdotool getactivewindow)).to_i
 
-    window_geometry = (`xdotool getwindowgeometry #{window_id}`.scan /Position: (?<x>\d+),(?<y>\d+)(.*)Geometry: (?<width>\d+)x(?<height>\d+)/m).first.map { |key, value| [ key.to_sym, value.to_i ] }.to_h
+    window_geometry = (%x(xdotool getwindowgeometry #{window_id}).scan /Position: (?<x>\d+),(?<y>\d+)(.*)Geometry: (?<width>\d+)x(?<height>\d+)/m).first.map { |key, value| [ key.to_sym, value.to_i ] }.to_h
 
     x = window_geometry[:width]  * x
     y = window_geometry[:height] * y
 
-    `xdotool mousemove --window #{window_id} #{x} #{y}`
+    %x(xdotool mousemove --window #{window_id} #{x} #{y})
 
   end
 
@@ -31,9 +31,9 @@ class Sync < Thor
 
   def get
 
-    window_geometry = (`xdotool getactivewindow getwindowgeometry`.scan /Position: (?<x>\d+),(?<y>\d+)(.*)Geometry: (?<width>\d+)x(?<height>\d+)/m).first.map { |key, value| [ key.to_sym, value.to_i ] }.to_h
+    window_geometry = (%x(xdotool getactivewindow getwindowgeometry).scan /Position: (?<x>\d+),(?<y>\d+)(.*)Geometry: (?<width>\d+)x(?<height>\d+)/m).first.map { |key, value| [ key.to_sym, value.to_i ] }.to_h
 
-    mouse_location = (`xdotool getmouselocation`.scan /x:(?<x>\d+) y:(?<y>\d+) screen:(?<screen>\d+) window:(?<window>\d+)/).first.map { |key, value| [ key.to_sym, value.to_i ] }.to_h
+    mouse_location = (%x(xdotool getmouselocation).scan /x:(?<x>\d+) y:(?<y>\d+) screen:(?<screen>\d+) window:(?<window>\d+)/).first.map { |key, value| [ key.to_sym, value.to_i ] }.to_h
 
     window_mouse_location = {
       x: mouse_location[:x] - window_geometry[:x],
