@@ -8,7 +8,7 @@ Usage
 
 Move mouse to window center:
 
-``` sh
+```
 xdotool-mouse-window move 0.5 0.5
 ```
 
