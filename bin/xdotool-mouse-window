@@ -55,8 +55,8 @@ class Sync < Thor
     }
 
     format =
-      options[:format] or
-      data.keys.map { |name| "#{name}: %{#{name}}" }.join "\n"
+      options[:format] ||
+      data.keys.map { |name| "#{name}: %{#{name}}" }.join("\n")
 
     print format % data
 
