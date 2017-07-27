@@ -27,7 +27,7 @@ class Sync < Thor
 
   desc 'get', 'get mouse location'
 
-  option :shell
+  option :format
 
   def get
 
@@ -54,14 +54,11 @@ class Sync < Thor
       window: mouse_location[:window],
     }
 
-    output =
-    if options[:shell]
-      data.collect { |key, value| "#{key.upcase}=#{value}" }.join "\n"
-    else
-      data.collect { |key, value| "#{key}:#{value}" }.join ' '
-    end
+    format =
+      options[:format] or
+      data.keys.map { |name| "#{name}: %{#{name}}" }.join "\n"
 
-    print output
+    print format % data
 
   end
 

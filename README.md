@@ -14,23 +14,23 @@ xdotool-mouse-window move 0.5 0.5
 
 Get mouse position:
 
-``` sh
-eval $(xdotool-mouse-window get --shell)
+```
+xdotool-mouse-window get
 ```
 
 ```
-X=<value>
-Y=<value>
-CX=<value>
-CY=<value>
-SCREEN=<value>
-WINDOW=<value>
+x: <value>
+y: <value>
+cx: <value>
+cy: <value>
+screen: <value>
+window: <value>
 ```
 
 Commands
 --------
 
-- `get` `--shell`
+- `get` `--format`
   - `x`
   - `y`
   - `cx` (coefficient)
