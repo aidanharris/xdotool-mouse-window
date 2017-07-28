@@ -2,7 +2,15 @@ Dependencies
 ------------
 
 - [xdotool][]
-- [Ruby][]
+- [Thor][]
+
+Dependencies are handled by the [Gem system][RubyGems].
+Just make sure to have [Ruby][] before running `make`.
+
+Installation
+------------
+
+To install, just type `make install`.
 
 Usage
 -----
@@ -42,3 +50,5 @@ Commands
 
 [xdotool]: http://semicomplete.com/projects/xdotool
 [Ruby]: https://ruby-lang.org
+[RubyGems]: https://rubygems.org
+[Thor]: http://whatisthor.com
