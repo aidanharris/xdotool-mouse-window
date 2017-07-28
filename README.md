@@ -2,7 +2,8 @@ Dependencies
 ------------
 
 - [xdotool][]
-- [Thor][]
+- [Ruby][]
+  - [Thor][]
 
 Dependencies are handled by the [Gem system][RubyGems].
 Just make sure to have [Ruby][] before running `make`.
