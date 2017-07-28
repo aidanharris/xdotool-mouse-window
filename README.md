@@ -2,6 +2,7 @@ Dependencies
 ------------
 
 - [xdotool][]
+- [Ruby][]
 
 Usage
 -----
@@ -40,3 +41,4 @@ Commands
 - `move` `x` (0 → 1) `y` (0 → 1) `--window <id>`
 
 [xdotool]: http://semicomplete.com/projects/xdotool
+[Ruby]: https://ruby-lang.org
