@@ -1,81 +1,86 @@
-#!/usr/bin/env ruby
+#!/bin/sh
 
-require 'thor'
+help() {
+  status=${1:-0}
+  cat <<EOF
+Usage
+‾‾‾‾‾
+$ xdotool-mouse-window <command> [argument]…
 
-# Main ├────────────────────────────────────────────────────────────────────────
+Commands
+‾‾‾‾‾‾‾‾
+– get [format]: get mouse location
+– move <x> <y> [window]: move mouse
+– help: display a help message and quit
+EOF
+  exit $status
+}
 
-class Sync < Thor
+main() {
+  # No command
+  [ $# = 0 ] &&
+  {
+    help 1
+  }
+  # Command
+  command=$1
+  shift
+  case $command in
+    get)
+      get $@
+    ;;
+    move)
+      move $@
+    ;;
+    help)
+      help
+    ;;
+    *)
+      echo "No such command: $command"
+      help 1
+    ;;
+  esac
+}
 
-  desc 'move', 'move mouse'
+move() {
+  x=$1
+  y=$2
+  window=${3:-$(xdotool getactivewindow)}
+  eval $(xdotool getwindowgeometry --shell $window)
+  x=$(echo $WIDTH '*' $x | bc)
+  y=$(echo $HEIGHT '*' $y | bc)
+  xdotool mousemove --window $window $x $y
+}
 
-  option :window
+get() {
+  format=${1:-$(echo '
+    x: $x
+    y: $y
+    cx: $cx
+    cy: $cy
+    screen: $screen
+    window: $window
+  ' | sed '1d;$d;s/^ *//')}
+  eval $(xdotool getactivewindow getwindowgeometry --shell)
+  geometry_x=$X
+  geometry_y=$Y
+  geometry_width=$WIDTH
+  geometry_height=$HEIGHT
+  eval $(xdotool getmouselocation --shell)
+  mouse_x=$X
+  mouse_y=$Y
+  window_mouse_x=$(echo $mouse_x - $geometry_x | bc)
+  window_mouse_y=$(echo $mouse_y - $geometry_y | bc)
+  coefficient_x=$(echo $window_mouse_x / $geometry_width | bc --mathlib)
+  coefficient_y=$(echo $window_mouse_y / $geometry_height | bc --mathlib)
+  echo "$format" |
+  sed \
+    --expression s/'$x'/$window_mouse_x/g \
+    --expression s/'$y'/$window_mouse_y/g \
+    --expression s/'$cx'/$coefficient_x/g \
+    --expression s/'$cy'/$coefficient_y/g \
+    --expression s/'$screen'/$SCREEN/g \
+    --expression s/'$window'/$WINDOW/g
+}
 
-  def move x, y
-
-    x, y = x.to_f, y.to_f
-
-    window_id = (options[:window] || %x(xdotool getactivewindow)).to_i
-
-    window_geometry = (%x(xdotool getwindowgeometry #{window_id}).scan /Position: (?<x>\d+),(?<y>\d+)(.*)Geometry: (?<width>\d+)x(?<height>\d+)/m).first.map { |key, value| [ key.to_sym, value.to_i ] }.to_h
-
-    x = window_geometry[:width]  * x
-    y = window_geometry[:height] * y
-
-    %x(xdotool mousemove --window #{window_id} #{x} #{y})
-
-  end
-
-  desc 'get', 'get mouse location'
-
-  option :format
-
-  def get
-
-    window_geometry = (%x(xdotool getactivewindow getwindowgeometry).scan /Position: (?<x>\d+),(?<y>\d+)(.*)Geometry: (?<width>\d+)x(?<height>\d+)/m).first.map { |key, value| [ key.to_sym, value.to_i ] }.to_h
-
-    mouse_location = (%x(xdotool getmouselocation).scan /x:(?<x>\d+) y:(?<y>\d+) screen:(?<screen>\d+) window:(?<window>\d+)/).first.map { |key, value| [ key.to_sym, value.to_i ] }.to_h
-
-    window_mouse_location = {
-      x: mouse_location[:x] - window_geometry[:x],
-      y: mouse_location[:y] - window_geometry[:y],
-    }
-
-    coefficient = {
-      x: window_mouse_location[:x].to_f / window_geometry[:width].to_f,
-      y: window_mouse_location[:y].to_f / window_geometry[:height].to_f,
-    }
-
-    data = {
-      x: window_mouse_location[:x],
-      y: window_mouse_location[:y],
-      cx: coefficient[:x],
-      cy: coefficient[:y],
-      screen: mouse_location[:screen],
-      window: mouse_location[:window],
-    }
-
-    format =
-      options[:format] ||
-      data.keys.map { |name| "#{name}: %{#{name}}" }.join("\n")
-
-    print format % data
-
-  end
-
-end
-
-# Utility ├─────────────────────────────────────────────────────────────────────
-
-class String
-  alias :old_scan :scan
-  def scan regexp
-    if regexp.names.empty?
-      old_scan(regexp)
-    else
-      old_scan(regexp).collect { |match| Hash[regexp.names.zip match] }
-    end
-  end
-end
-
-
-Sync.start ARGV
+main "$@"
