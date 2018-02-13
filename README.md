@@ -1,4 +1,6 @@
-[X][] tool for mouse commands relative to a window.
+###### [Usage](#usage) | [Documentation](#commands) | [Contributing](CONTRIBUTING)
+
+> [X][] tool for mouse commands relative to a window.
 
 Dependencies
 ------------
