@@ -2,20 +2,17 @@
 
 > [X][] tool for mouse commands relative to a window.
 
-Dependencies
-------------
+## Dependencies
 
 - [xdotool][]
 
-Installation
-------------
+## Installation
 
 1. Download the [script](bin/xdotool-mouse-window)
 2. Place it on your `$PATH` (`~/bin` is a good choice if it is on your path)
 3. Set it to be executable (`chmod +x <file>…`)
 
-Usage
------
+## Usage
 
 Move mouse to window center:
 
@@ -42,8 +39,7 @@ window: <value>
 
 Optionally, you can fill a format, using shell variable syntax.
 
-Commands
---------
+## Commands
 
 - `get` `[format]`
   - `$x`
