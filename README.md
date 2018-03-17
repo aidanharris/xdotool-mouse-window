@@ -8,9 +8,9 @@
 
 ## Installation
 
-1. Download the [script](bin/xdotool-mouse-window)
-2. Place it on your `$PATH` (`~/bin` is a good choice if it is on your path)
-3. Set it to be executable (`chmod +x <file>…`)
+``` sh
+ln --symbolic $PWD/bin/xdotool-mouse-window ~/.local/bin/
+```
 
 ## Usage
 
