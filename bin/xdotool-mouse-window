@@ -55,14 +55,13 @@ move() {
 }
 
 get() {
-  format=${1:-$(echo '
-    x: $x
-    y: $y
-    cx: $cx
-    cy: $cy
-    screen: $screen
-    window: $window
-  ' | sed '1d;$d;s/^ *//')}
+  test $# = 0 && set \
+'x: $x
+y: $y
+cx: $cx
+cy: $cy
+screen: $screen
+window: $window'
   eval $(xdotool getactivewindow getwindowgeometry --shell)
   geometry_x=$X
   geometry_y=$Y
@@ -75,7 +74,7 @@ get() {
   window_mouse_y=$(echo $mouse_y - $geometry_y | bc)
   coefficient_x=$(echo $window_mouse_x / $geometry_width | bc --mathlib)
   coefficient_y=$(echo $window_mouse_y / $geometry_height | bc --mathlib)
-  echo "$format" |
+  echo "$@" |
   sed \
     --expression s/'$x'/$window_mouse_x/g \
     --expression s/'$y'/$window_mouse_y/g \
